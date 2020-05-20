@@ -1,0 +1,16 @@
+# Piotr Baranowski <piotr.baranowski@osec.pl>
+# OBS Studio as an advanced video director for windows - setup guide
+
+1. Install OBS Studio
+https://obsproject.com/download
+
+2. Install OBS Virtual Camera plugin
+https://obsproject.com/forum/resources/obs-virtualcam.949/
+
+3. Once the OBS is running select Tools -> Virtual Camera.
+
+4. Setup your sources/scenes as desired. Save scene collection for future re-use
+
+5. Start the streaming application or navigate your browser to streaming service website and select OBS Camera as device.
+
+Profit.
