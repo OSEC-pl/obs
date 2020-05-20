@@ -2,7 +2,7 @@
 2. Fully update: 
    sudo dnf update
 3. Install build tools:
-   dnf install git vim tmux @Development Tools kernel-devel kernel-headers elfutils-libelf-devel cmake qt5-qtbase-devel
+   sudo dnf install git vim tmux "@Development Tools" kernel-devel kernel-headers elfutils-libelf-devel cmake qt5-qtbase-devel
 
 4. Install EPEL: 
    sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
@@ -17,8 +17,11 @@
 7. Prepare the kernel module source
    git clone https://github.com/umlaeute/v4l2loopback.git
 
-8. Build the kernel module:
-   make && make install
+8. Build and install the kernel module:
+   cd v4l2loopback
+   make
+   sudo make install
+   sudo depmod -a
    
 9. Create the module config file:
    [user@localhost ~]$ cat /etc/modprobe.d/v4l2loopback.conf 
@@ -40,4 +43,4 @@
     sudo make install
     
 13. Fix the plugin location:
-    mv sudo mv /usr/lib/obs-plugins/v4l2sink.so /usr/lib64/obs-plugins/v4l2sink.so
+    sudo mv /usr/lib/obs-plugins/v4l2sink.so /usr/lib64/obs-plugins/v4l2sink.so
