@@ -1,0 +1,43 @@
+1. Install Rhel/Centos 8
+2. Fully update: 
+   sudo dnf update
+3. Install build tools:
+   dnf install git vim tmux @Development Tools kernel-devel kernel-headers elfutils-libelf-devel cmake qt5-qtbase-devel
+
+4. Install EPEL: 
+   sudo dnf install --nogpgcheck https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+5. Install RPMFusion:
+   sudo dnf install --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm \
+   https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
+
+6. Install obs-studio and obs-studio-devel
+   sudo dnf install obs-studio obs-studio-devel
+   
+7. Prepare the kernel module source
+   git clone https://github.com/umlaeute/v4l2loopback.git
+
+8. Build the kernel module:
+   make && make install
+   
+9. Create the module config file:
+   [user@localhost ~]$ cat /etc/modprobe.d/v4l2loopback.conf 
+   options v4l2loopback exclusive_caps=1 card_label="OBS Virtual Cam" devices=1 video_nr=10
+
+10. Load the module:
+    sudo modprobe v4l2loopback
+   
+11. Prepare the obs-sources and obs-v4l2loopbacks-sink
+
+    git clone https://github.com/CatxFish/obs-v4l2sink.git
+    git clone --recursive https://github.com/obsproject/obs-studio.git
+
+12. Build the sink:
+    cd obs-v4l2sink/
+    mkdir build && cd build
+    cmake -DLIBOBS_INCLUDE_DIR="../../obs-studio/libobs" -DCMAKE_INSTALL_PREFIX=/usr ..
+    make -j 
+    sudo make install
+    
+13. Fix the plugin location:
+    mv sudo mv /usr/lib/obs-plugins/v4l2sink.so /usr/lib64/obs-plugins/v4l2sink.so
