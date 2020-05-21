@@ -80,24 +80,24 @@
           - obs-studio-devel
         state: latest
 
-    - name: Confirm /srv/buildtree directory exists
+    - name: Confirm /tmp/buildtree directory exists
       file:
-        path: /srv/buildtree
+        path: /tmp/buildtree
         state: directory
         mode: 1777
 
     - name: Prepare the kernel module source
       git:
         repo: https://github.com/umlaeute/v4l2loopback.git
-        dest: /srv/buildtree/v4l2loopback
+        dest: /tmp/buildtree/v4l2loopback
 
     - name: Build kernel module
       make:
-        chdir: /srv/buildtree/v4l2loopback
+        chdir: /tmp/buildtree/v4l2loopback
 
     - name: Install kernel module
       make:
-        chdir: /srv/buildtree/v4l2loopback
+        chdir: /tmp/buildtree/v4l2loopback
         target: install
 
     # This could use a conditional if it's not needed
@@ -119,32 +119,32 @@
     - name: Make sure obs-sources are up to date
       git:
         repo: https://github.com/CatxFish/obs-v4l2sink.git
-        dest: /srv/buildtree/obs-v4l2sink
+        dest: /tmp/buildtree/obs-v4l2sink
 
     - name: Make sure obs-v4l2loopbacks-sink is up to date
       git:
         repo: https://github.com/obsproject/obs-studio.git
-        dest: /srv/buildtree/obs-studio
+        dest: /tmp/buildtree/obs-studio
         recursive: yes
 
-    - name: Make sure /srv/buildtree/obs-v4l2sink/build exists
+    - name: Make sure /tmp/buildtree/obs-v4l2sink/build exists
       file:
-        path: /srv/buildtree/obs-v4l2sink/build
+        path: /tmp/buildtree/obs-v4l2sink/build
         state: directory
 
     # Could use a conditional here too
     - name: Generate obs-v4l2sink buildsystem
       command: 
         cmd: cmake -DLIBOBS_INCLUDE_DIR="../../obs-studio/libobs" -DCMAKE_INSTALL_PREFIX=/usr ..
-        chdir: /srv/buildtree/obs-v4l2sink/build
+        chdir: /tmp/buildtree/obs-v4l2sink/build
 
     - name: Build obs-v4l2sink
       make:
-        chdir: /srv/buildtree/obs-v4l2sink/build
+        chdir: /tmp/buildtree/obs-v4l2sink/build
 
     - name: Install obs-v4l2sink
       make:
-        chdir: /srv/buildtree/obs-v4l2sink/build
+        chdir: /tmp/buildtree/obs-v4l2sink/build
         target: install
 
     - name: Install the v4l2sink.so plugin
