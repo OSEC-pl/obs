@@ -1,0 +1,161 @@
+# rhel8.yml
+# Ansible Playbook to deploy OBS according to 
+# https://github.com/OSEC-pl/obs/blob/master/setup/rhel8.txt
+#
+# Copyright 2020 Steven Bonneville 
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Configure OBS on RHEL 8
+  hosts: all
+  become: yes
+
+  vars:
+    rhel8_build_tools:
+      - git
+      - vim
+      - tmux
+      - "@Development Tools"
+      - kernel-devel
+      - kernel-headers
+      - elfutils-libelf-devel
+      - cmake
+      - qt5-qtbase-devel
+
+  tasks:
+    - name: Kernel is up to date
+      yum:
+        name: kernel
+        state: latest
+      register: kernel_updated
+
+    - name: Reboot if kernel updated
+      reboot:
+      when: kernel_updated['changed'] == true
+
+    - name: All packages are up to date
+      yum:
+        name: '*'
+        state: latest
+
+    # Could use another condition if it's been done
+    - name: Make sure PowerTools is enabled on CentOS 
+      command: 
+        cmd: dnf config-manager --enable PowerTools
+      when: ansible_distribution == 'CentOS'
+
+    - name: Build tools are present
+      yum:
+        name: "{{ rhel8_build_tools }}"
+        state: latest
+
+    - name: Make sure EPEL is enabled
+      yum:
+        name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+        state: latest
+        disable_gpg_check: yes
+
+    - name: Make sure RPMFusion is enabled
+      yum:
+        name:
+          - https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm
+          - https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
+        state: latest
+        disable_gpg_check: yes
+
+    - name: Make sure OBS is installed
+      yum:
+        name:
+          - obs-studio
+          - obs-studio-devel
+        state: latest
+
+    - name: Confirm /srv/buildtree directory exists
+      file:
+        path: /srv/buildtree
+        state: directory
+        mode: 1777
+
+    - name: Prepare the kernel module source
+      git:
+        repo: https://github.com/umlaeute/v4l2loopback.git
+        dest: /srv/buildtree/v4l2loopback
+
+    - name: Build kernel module
+      make:
+        chdir: /srv/buildtree/v4l2loopback
+
+    - name: Install kernel module
+      make:
+        chdir: /srv/buildtree/v4l2loopback
+        target: install
+
+    # This could use a conditional if it's not needed
+    # We could probably check to see if the module is loaded first
+    - name: Build kernel module dependencies
+      command: 
+        cmd: depmod -a
+
+    - name: Check the module config file
+      copy:
+        dest: /etc/modprobe.d/v4l2loopback.conf
+        content: 'options v4l2loopback exclusive_caps=1 card_label="OBS Virtual Cam" devices=1 video_nr=10'
+
+    - name: Make sure v4l2loopback.ko is loaded
+      modprobe:
+        name: v4l2loopback
+        state: present
+
+    - name: Make sure obs-sources are up to date
+      git:
+        repo: https://github.com/CatxFish/obs-v4l2sink.git
+        dest: /srv/buildtree/obs-v4l2sink
+
+    - name: Make sure obs-v4l2loopbacks-sink is up to date
+      git:
+        repo: https://github.com/obsproject/obs-studio.git
+        dest: /srv/buildtree/obs-studio
+        recursive: yes
+
+    - name: Make sure /srv/buildtree/obs-v4l2sink/build exists
+      file:
+        path: /srv/buildtree/obs-v4l2sink/build
+        state: directory
+
+    # Could use a conditional here too
+    - name: Generate obs-v4l2sink buildsystem
+      command: 
+        cmd: cmake -DLIBOBS_INCLUDE_DIR="../../obs-studio/libobs" -DCMAKE_INSTALL_PREFIX=/usr ..
+        chdir: /srv/buildtree/obs-v4l2sink/build
+
+    - name: Build obs-v4l2sink
+      make:
+        chdir: /srv/buildtree/obs-v4l2sink/build
+
+    - name: Install obs-v4l2sink
+      make:
+        chdir: /srv/buildtree/obs-v4l2sink/build
+        target: install
+
+    - name: Install the v4l2sink.so plugin
+      copy:
+        remote_src: yes
+        src: /usr/lib/obs-plugins/v4l2sink.so
+        dest: /usr/lib64/obs-plugins/v4l2sink.so
+        mode: 0755
+
+    - name: Make sure /usr/lib/obs-plugins/v4l2sink.so is gone
+      file:
+        path: /usr/lib/obs-plugins/v4l2sink.so
+        state: absent
+
