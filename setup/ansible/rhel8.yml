@@ -116,12 +116,12 @@
         name: v4l2loopback
         state: present
 
-    - name: Make sure obs-sources are up to date
+    - name: Make sure obs-v4l2sink is up to date
       git:
         repo: https://github.com/CatxFish/obs-v4l2sink.git
         dest: /tmp/buildtree/obs-v4l2sink
 
-    - name: Make sure obs-v4l2loopbacks-sink is up to date
+    - name: Make sure obs-studio is up to date
       git:
         repo: https://github.com/obsproject/obs-studio.git
         dest: /tmp/buildtree/obs-studio
