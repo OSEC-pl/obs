@@ -1,0 +1,14 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure(2) do |config|
+
+  config.vm.define "centos8", autostart: true do |subconfig|
+    subconfig.vm.hostname = "centos8"
+    subconfig.vm.box = "centos/8"
+    subconfig.vm.provision "ansible" do |ansible|
+      ansible.playbook = "rhel8.yml"
+    end
+  end
+
+end

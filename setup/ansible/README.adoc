@@ -1,0 +1,11 @@
+Ansible Playbook designed to perform the steps in ../rhel8.txt. 
+Includes a Vagrantfile configured to test the playbook with a
+CentOS 8 box.
+
+Runs cleanly against the Vagrantfile for CentOS 8, but the results
+have not been tested and a RHEL 8 test has not yet been performed.
+
+Licensed under Apache 2.0 to ensure it can be distributed/edited.
+
+Steve Bonneville, 20 May 2020
+
