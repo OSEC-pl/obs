@@ -17,7 +17,7 @@
 # limitations under the License.
 
 - name: Configure OBS on RHEL 8
-  hosts: all
+  hosts: localhost
   become: yes
 
   vars:
