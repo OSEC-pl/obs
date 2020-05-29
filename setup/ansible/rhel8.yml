@@ -84,7 +84,7 @@
       file:
         path: /tmp/buildtree
         state: directory
-        mode: 1777
+        mode: 1755
 
     - name: Prepare the kernel module source
       git:
