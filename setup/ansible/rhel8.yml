@@ -53,6 +53,12 @@
         enablerepo: PowerTools
       when: ansible_distribution == 'CentOS'
 
+    - name: Enable CodeReady Builder for RHEL8
+      rhsm_repository:
+        name: codeready-builder-for-rhel-8-x86_64-rpms
+        state: enabled
+      when: ansible_distribution == 'RedHat'
+
     - name: Build tools are present
       yum:
         name: "{{ rhel8_build_tools }}"
@@ -112,7 +118,7 @@
       command: 
         cmd: depmod -a
 
-    - name: Check the module config file
+    - name: Create the module config file
       copy:
         dest: /etc/modprobe.d/v4l2loopback.conf
         content: 'options v4l2loopback exclusive_caps=1 card_label="OBS Virtual Cam" devices=1 video_nr=10'
