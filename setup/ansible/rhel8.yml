@@ -48,7 +48,6 @@
         name: '*'
         state: latest
 
-    # Could use another condition if it's been done
     - name: Make sure PowerTools is enabled on CentOS 
       yum:
         enablerepo: PowerTools
@@ -59,11 +58,18 @@
         name: "{{ rhel8_build_tools }}"
         state: latest
 
-    - name: Make sure EPEL is enabled
+    - name: Make sure EPEL is enabled in RHEL8
       yum:
         name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
         state: latest
         disable_gpg_check: yes
+      when: ansible_distribution == 'RedHat'
+      
+     - name: Make sure EPEL is enabled in CentOS8
+      yum:
+        name: epel-release
+        state: latest
+      when: ansible_distribution == 'CentOS'     
 
     - name: Make sure RPMFusion is enabled
       yum:
