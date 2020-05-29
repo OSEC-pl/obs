@@ -50,8 +50,8 @@
 
     # Could use another condition if it's been done
     - name: Make sure PowerTools is enabled on CentOS 
-      command: 
-        cmd: dnf config-manager --enable PowerTools
+      yum:
+        enablerepo: PowerTools
       when: ansible_distribution == 'CentOS'
 
     - name: Build tools are present
