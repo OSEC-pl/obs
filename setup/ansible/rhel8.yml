@@ -49,8 +49,8 @@
         state: latest
 
     - name: Make sure PowerTools is enabled on CentOS 
-      yum:
-        enablerepo: PowerTools
+      command: 
+        cmd: dnf config-manager --enable PowerTools
       when: ansible_distribution == 'CentOS'
 
     - name: Enable CodeReady Builder for RHEL8
